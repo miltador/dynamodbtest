@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"strings"
 	"sync/atomic"
 	"syscall"
 	"time"
@@ -29,7 +30,8 @@ type DB struct {
 func New() (*DB, error) {
 	port := newPort()
 	addr := fmt.Sprintf("localhost:%d", port)
-	gopath := os.Getenv("GOPATH")
+	// if $GOPATH is composed of multiple paths, use the first one (fix for godep)
+	gopath := strings.Split(os.Getenv("GOPATH"), ":")[0]
 	if gopath == "" {
 		return nil, ErrGopath
 	}
