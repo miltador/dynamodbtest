@@ -20,6 +20,9 @@ var (
 	ErrGopath         = errors.New("[dynamodbtest] GOPATH must be set")
 )
 
+// LogOutput must be set before calling New()
+var LogOutput bool
+
 // DB represents a DynamoDB Local process
 type DB struct {
 	addr string
@@ -50,20 +53,22 @@ func New() (*DB, error) {
 	}
 
 	// log output
-	cmdReader, err := db.cmd.StderrPipe()
-	if err != nil {
-		return nil, err
+	if LogOutput {
+		cmdReader, err := db.cmd.StderrPipe()
+		if err != nil {
+			return nil, err
+		}
+
+		scanner := bufio.NewScanner(cmdReader)
+		go func() {
+			for scanner.Scan() {
+				log.Printf("[dynamodbtest:%d] %s\n", port, scanner.Text())
+			}
+		}()
 	}
 
-	scanner := bufio.NewScanner(cmdReader)
-	go func() {
-		for scanner.Scan() {
-			log.Printf("[dynamodbtest:%d] %s\n", port, scanner.Text())
-		}
-	}()
-
 	// start command
-	err = db.cmd.Start()
+	err := db.cmd.Start()
 	if err != nil {
 		return nil, err
 	}
