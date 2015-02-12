@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	CONNECT_TIMEOUT   = 3 * time.Second
+	ConnectTimeout    = 10 * time.Second
 	ErrConnectTimeout = errors.New("[dynamodbtest] timeout starting server")
 	ErrGopath         = errors.New("[dynamodbtest] GOPATH must be set")
 )
@@ -92,7 +92,7 @@ func New() (*DB, error) {
 	select {
 	case <-connected:
 		return db, nil
-	case <-time.After(CONNECT_TIMEOUT):
+	case <-time.After(ConnectTimeout):
 		db.Close()
 		return nil, ErrConnectTimeout
 	}
