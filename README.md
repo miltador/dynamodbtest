@@ -1,17 +1,22 @@
 # dynamodbtest
 
-Package for testing golang programs that use DynamoDB.
+Package for testing Go language programs that use DynamoDB.
+
+Runs DynamoDB local server.
 
 ## Install
 
-	$ go get github.com/groupme/dynamodbtest
+	$ go get github.com/miltador/dynamodbtest
 
 ## Usage
 
 ```go
 package foo
 
-import "github.com/groupme/dynamodbtest"
+import (
+    "github.com/miltador/dynamodbtest"
+    "testing"
+)
 
 func TestFoo(t *testing.T) {
 	// Log output to aid debugging
