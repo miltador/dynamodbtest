@@ -2,7 +2,7 @@
 
 Package for testing Go language programs that use DynamoDB.
 
-Runs DynamoDB local server.
+Runs a DynamoDB local server.
 
 ## Install
 
