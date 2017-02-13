@@ -35,3 +35,5 @@ vendor/
 dynamodb_local_latest.tar.gz
 LICENSE.txt
 README.txt
+DynamoDBLocal_lib
+DynamoDBLocal.jar

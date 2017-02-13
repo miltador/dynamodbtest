@@ -53,7 +53,7 @@ func overwrite(mpath string) (*os.File, error) {
 	return f, nil
 }
 
-func untarIt(mpath string) {
+func untarIt(basepath, mpath string) {
 	fr, err := read(mpath)
 	defer fr.Close()
 	if err != nil {
@@ -77,11 +77,11 @@ func untarIt(mpath string) {
 		path := hdr.Name
 		switch hdr.Typeflag {
 		case tar.TypeDir:
-			if err := os.MkdirAll(path, os.FileMode(hdr.Mode)); err != nil {
+			if err := os.MkdirAll(basepath+path, os.FileMode(hdr.Mode)); err != nil {
 				panic(err)
 			}
 		case tar.TypeReg:
-			ow, err := overwrite(path)
+			ow, err := overwrite(basepath + path)
 			defer ow.Close()
 			if err != nil {
 				panic(err)
@@ -122,7 +122,7 @@ func New() (*DB, error) {
 		io.Copy(f, response.Body)
 	}
 	if _, err := os.Stat(path + "DynamoDbLocal_lib/"); os.IsNotExist(err) {
-		untarIt(archivePath)
+		untarIt(path, archivePath)
 	}
 
 	db := &DB{
