@@ -1,6 +1,7 @@
 package dynamodbtest
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -24,4 +25,20 @@ func TestAll(t *testing.T) {
 	if _err != nil {
 		t.Fatal(_err)
 	}
+}
+
+func Example() {
+	// Log output to aid debugging
+	LogOutput = true
+
+	// Start a new test process
+	db, err := New()
+	if err != nil {
+		fmt.Errorf("Couldn't start DynamoDB local, %v", err)
+	}
+	defer db.Close()
+
+	// Choice of client is up to you, but you will need to point it at db.URL
+	//client := NewDynamoClient(...)
+	//client.URL = db.URL()
 }

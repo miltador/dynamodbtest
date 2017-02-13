@@ -1,25 +1,28 @@
+// Package for testing Go language programs that use DynamoDB.
+//
+// Runs a DynamoDB local server.
 package dynamodbtest
 
 import (
+	"archive/tar"
 	"bufio"
+	"compress/gzip"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/exec"
 	"sync/atomic"
 	"time"
-	"net/http"
-	"io"
-	"archive/tar"
-	"compress/gzip"
 )
 
 var (
-	ConnectTimeout = 10 * time.Second
+	ConnectTimeout    = 10 * time.Second
 	ErrConnectTimeout = errors.New("[dynamodbtest] timeout starting server")
-	ErrGopath = errors.New("[dynamodbtest] GOPATH must be set")
+	ErrGopath         = errors.New("[dynamodbtest] GOPATH must be set")
 )
 
 // LogOutput must be set before calling New()
@@ -40,7 +43,7 @@ func read(mpath string) (*os.File, error) {
 }
 
 func overwrite(mpath string) (*os.File, error) {
-	f, err := os.OpenFile(mpath, os.O_RDWR | os.O_TRUNC, 0777)
+	f, err := os.OpenFile(mpath, os.O_RDWR|os.O_TRUNC, 0777)
 	if err != nil {
 		f, err = os.Create(mpath)
 		if err != nil {
@@ -126,9 +129,9 @@ func New() (*DB, error) {
 		addr: addr,
 		cmd: exec.Command(
 			"java",
-			"-Djava.library.path=" + path + "DynamoDbLocal_lib",
+			"-Djava.library.path="+path+"DynamoDbLocal_lib",
 			"-jar",
-			path + "DynamoDBLocal.jar",
+			path+"DynamoDBLocal.jar",
 			"-port",
 			fmt.Sprintf("%d", port),
 			"-inMemory",
