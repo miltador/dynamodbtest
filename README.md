@@ -1,4 +1,6 @@
 # dynamodbtest
+[![GoDoc](https://godoc.org/github.com/miltador/dynamodbtest?status.svg)](https://godoc.org/github.com/miltador/dynamodbtest)
+[![Linux and OS X Build Status](https://travis-ci.org/miltador/dynamodbtest.svg?branch=master)](https://travis-ci.org/miltador/dynamodbtest)
 
 Package for testing Go language programs that use DynamoDB.
 
@@ -35,3 +37,7 @@ func TestFoo(t *testing.T) {
 }
 
 ```
+
+## Documentation
+
+You can read the documentation on [GoDoc](https://godoc.org/github.com/miltador/dynamodbtest).

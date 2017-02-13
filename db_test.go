@@ -4,6 +4,7 @@ import (
 	"testing"
 )
 
+// TestAll tests public API
 func TestAll(t *testing.T) {
 	// Log output to aid debugging
 	LogOutput = true
