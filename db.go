@@ -1,25 +1,25 @@
 package dynamodbtest
 
 import (
+	"archive/tar"
 	"bufio"
+	"compress/gzip"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/exec"
 	"sync/atomic"
 	"time"
-	"net/http"
-	"io"
-	"archive/tar"
-	"compress/gzip"
 )
 
 var (
-	ConnectTimeout = 10 * time.Second
+	ConnectTimeout    = 10 * time.Second
 	ErrConnectTimeout = errors.New("[dynamodbtest] timeout starting server")
-	ErrGopath = errors.New("[dynamodbtest] GOPATH must be set")
+	ErrGopath         = errors.New("[dynamodbtest] GOPATH must be set")
 )
 
 // LogOutput must be set before calling New()
@@ -40,7 +40,7 @@ func read(mpath string) (*os.File, error) {
 }
 
 func overwrite(mpath string) (*os.File, error) {
-	f, err := os.OpenFile(mpath, os.O_RDWR | os.O_TRUNC, 0777)
+	f, err := os.OpenFile(mpath, os.O_RDWR|os.O_TRUNC, 0777)
 	if err != nil {
 		f, err = os.Create(mpath)
 		if err != nil {
@@ -50,7 +50,7 @@ func overwrite(mpath string) (*os.File, error) {
 	return f, nil
 }
 
-func untarIt(mpath string) {
+func untarIt(basepath, mpath string) {
 	fr, err := read(mpath)
 	defer fr.Close()
 	if err != nil {
@@ -74,11 +74,11 @@ func untarIt(mpath string) {
 		path := hdr.Name
 		switch hdr.Typeflag {
 		case tar.TypeDir:
-			if err := os.MkdirAll(path, os.FileMode(hdr.Mode)); err != nil {
+			if err := os.MkdirAll(basepath+path, os.FileMode(hdr.Mode)); err != nil {
 				panic(err)
 			}
 		case tar.TypeReg:
-			ow, err := overwrite(path)
+			ow, err := overwrite(basepath + path)
 			defer ow.Close()
 			if err != nil {
 				panic(err)
@@ -119,16 +119,16 @@ func New() (*DB, error) {
 		io.Copy(f, response.Body)
 	}
 	if _, err := os.Stat(path + "DynamoDbLocal_lib/"); os.IsNotExist(err) {
-		untarIt(archivePath)
+		untarIt(path, archivePath)
 	}
 
 	db := &DB{
 		addr: addr,
 		cmd: exec.Command(
 			"java",
-			"-Djava.library.path=" + path + "DynamoDbLocal_lib",
+			"-Djava.library.path="+path+"DynamoDbLocal_lib",
 			"-jar",
-			path + "DynamoDBLocal.jar",
+			path+"DynamoDBLocal.jar",
 			"-port",
 			fmt.Sprintf("%d", port),
 			"-inMemory",
