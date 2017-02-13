@@ -9,6 +9,8 @@ import (
 func TestAll(t *testing.T) {
 	// Log output to aid debugging
 	LogOutput = true
+	// Increase connection timeout for Travis CI
+	ConnectTimeout = 25
 
 	// Start a new test process
 	db, err := New()
