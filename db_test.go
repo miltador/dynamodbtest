@@ -3,6 +3,7 @@ package dynamodbtest
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 // TestAll tests public API
@@ -10,7 +11,7 @@ func TestAll(t *testing.T) {
 	// Log output to aid debugging
 	LogOutput = true
 	// Increase connection timeout for Travis CI
-	ConnectTimeout = 25
+	ConnectTimeout = 25 * time.Second
 
 	// Start a new test process
 	db, err := New()
