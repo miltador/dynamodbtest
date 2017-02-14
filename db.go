@@ -15,6 +15,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path"
+	"runtime"
 	"sync/atomic"
 	"time"
 )
@@ -74,14 +76,14 @@ func untarIt(basepath, mpath string) {
 		if err != nil {
 			panic(err)
 		}
-		path := hdr.Name
+		dir := hdr.Name
 		switch hdr.Typeflag {
 		case tar.TypeDir:
-			if err := os.MkdirAll(basepath+path, os.FileMode(hdr.Mode)); err != nil {
+			if err := os.MkdirAll(basepath+dir, os.FileMode(hdr.Mode)); err != nil {
 				panic(err)
 			}
 		case tar.TypeReg:
-			ow, err := overwrite(basepath + path)
+			ow, err := overwrite(basepath + dir)
 			defer ow.Close()
 			if err != nil {
 				panic(err)
@@ -90,7 +92,7 @@ func untarIt(basepath, mpath string) {
 				panic(err)
 			}
 		default:
-			fmt.Printf("Can't: %c, %s\n", hdr.Typeflag, path)
+			fmt.Printf("Can't: %c, %s\n", hdr.Typeflag, basepath+dir)
 		}
 	}
 }
@@ -104,8 +106,9 @@ func New() (*DB, error) {
 	if gopath == "" {
 		return nil, ErrGopath
 	}
-	path := gopath + "/src/github.com/miltador/dynamodbtest/"
-	archivePath := path + "dynamodb_local_latest.tar.gz"
+	_, currentFilePath, _, _ := runtime.Caller(0)
+	dirpath := path.Dir(currentFilePath) + "/"
+	archivePath := dirpath + "dynamodb_local_latest.tar.gz"
 	if _, err := os.Stat(archivePath); os.IsNotExist(err) {
 		response, err := http.Get("https://s3-us-west-2.amazonaws.com/dynamodb-local/dynamodb_local_latest.tar.gz")
 		if err != nil {
@@ -121,17 +124,17 @@ func New() (*DB, error) {
 
 		io.Copy(f, response.Body)
 	}
-	if _, err := os.Stat(path + "DynamoDbLocal_lib/"); os.IsNotExist(err) {
-		untarIt(path, archivePath)
+	if _, err := os.Stat(dirpath + "DynamoDbLocal_lib/"); os.IsNotExist(err) {
+		untarIt(dirpath, archivePath)
 	}
 
 	db := &DB{
 		addr: addr,
 		cmd: exec.Command(
 			"java",
-			"-Djava.library.path="+path+"DynamoDbLocal_lib",
+			"-Djava.library.path="+dirpath+"DynamoDbLocal_lib",
 			"-jar",
-			path+"DynamoDBLocal.jar",
+			dirpath+"DynamoDBLocal.jar",
 			"-port",
 			fmt.Sprintf("%d", port),
 			"-inMemory",
